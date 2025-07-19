@@ -46,11 +46,10 @@
       max-width: 800px;
     }
     
-    .header-title {
+    .ascii-header {
       color: #0f8;
       white-space: pre;
-      font-size: 24px;
-      font-weight: bold;
+      font-size: 0.6vw;
       line-height: 1;
       margin-bottom: 20px;
       text-align: center;
@@ -150,15 +149,7 @@
       gap: 10px;
     }
     
-    #profile-container {
-      margin-bottom: 15px;
-      background-image: radial-gradient(
-        circle,
-        #000 25vmin,
-        #024 100vmax
-      );
-      border-radius: 6px;
-    }
+    /* Removed ASCII globe styles */
     
     .info-box {
       background: #1c2129;
@@ -187,6 +178,7 @@
       border-radius: 50%;
     }
     
+    /* Removed ASCII output styles */
     
     .command-panel {
       background: #0d1117;
@@ -288,6 +280,9 @@
       background: #0d1117;
       scrollbar-width: thin;
       scrollbar-color: #30363d #0d1117;
+      color: #e6edf3; /* Ensure text is visible */
+      font-size: 14px;
+      line-height: 1.6;
     }
     
     .terminal-content::-webkit-scrollbar {
@@ -345,6 +340,13 @@
     .prompt-prefix {
       display: inline;
       margin-right: 8px;
+    }
+    
+    .executed-command {
+      margin: 4px 0;
+      color: #e6edf3;
+      font-family: inherit;
+      line-height: 1.5;
     }
     
     .prompt input {
@@ -420,18 +422,37 @@
       from { border-right-color: #58a6ff; }
       to { border-right-color: transparent; }
     }
+    
+    .resume-output a {
+      color: #58a6ff;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      display: inline-block;
+      padding: 8px 12px;
+      border-radius: 4px;
+      margin: 10px 0;
+      background-color: rgba(88, 166, 255, 0.1);
+      border: 1px solid rgba(88, 166, 255, 0.3);
+    }
+    
+    .resume-output a:hover {
+      background-color: rgba(88, 166, 255, 0.2);
+      border-color: rgba(88, 166, 255, 0.5);
+      transform: translateY(-2px);
+    }
   </style>
 </head>
 <body>
 <div id="loading-screen">
   <div class="loading-container">
-    <div class="header-title">
+    <div class="ascii-header">
  █████╗ ██████╗ ██╗██╗         ██████╗ ██╗     ██╗██╗   ██╗
 ██╔══██╗██╔══██╗██║██║         ██╔══██╗██║     ██║██║   ██║
 ███████║██████╔╝██║██║         ██████╔╝██║     ██║██║   ██║
 ██╔══██║██╔══██╗██║██║         ██╔══██╗██║██   ██║██║   ██║
 ██║  ██║██████╔╝██║███████╗    ██████╔╝██║╚█████╔╝╚██████╔╝
 ╚═╝  ╚═╝╚═════╝ ╚═╝╚══════╝    ╚═════╝ ╚═╝ ╚════╝  ╚═════╝ 
+                                                       
     </div>
     
     <div class="loading-text typewriter">PORTFOLIO TERMINAL OS v2.1.5</div>
@@ -446,7 +467,7 @@
 
 <div id="left">
   <div id="user-info-panel">
-    <div id="profile-container" class="info-box">
+    <div class="info-box">
       <div class="info-icon">👤</div>
       <div>
         <strong>Abil Biju</strong><br>
@@ -487,7 +508,6 @@
     <div class="terminal-content" id="terminal-content"></div>
   </div>
 </div>
-
 <script>
 
 // Weather information using date as fallback
@@ -564,31 +584,9 @@ function showTimezone() {
 }
 
 // Show IP address
-async function showIP() {
+function showIP() {
   const ipDisplay = document.getElementById('ip-display');
-  ipDisplay.innerHTML = `<div class="info-icon">🌐</div> <div>Fetching IP...</div>`;
-  
-  try {
-    // Use a public IP API service
-    const response = await fetch('https://api.ipify.org?format=json');
-    if (!response.ok) {
-      throw new Error('Failed to fetch IP address');
-    }
-    
-    const data = await response.json();
-    const ip = data.ip;
-    
-    ipDisplay.innerHTML = `
-      <div class="info-icon">🌐</div>
-      <div>
-        <strong>IP Address</strong><br>
-        ${ip}
-      </div>
-    `;
-  } catch (err) {
-    console.error('Error fetching IP:', err);
-    ipDisplay.innerHTML = `<div class="info-icon">🌐</div> <div>Local Session</div>`;
-  }
+  ipDisplay.innerHTML = `<div class="info-icon">🌐</div> <div>Local Session</div>`;
 }
 
 // Initialize everything when the page loads
@@ -662,19 +660,27 @@ window.addEventListener('DOMContentLoaded', () => {
 function initTerminal() {
   const terminalContent = document.getElementById('terminal-content');
   
+  // Clear any existing content
+  terminalContent.innerHTML = '';
+  
   // Welcome message
   terminalContent.innerHTML = `
     <div class="terminal-line intro-text">Welcome to Abil Biju's Portfolio Terminal!</div>
     <div class="terminal-line">Type <span style="color: #3fb950;">help</span> to see available commands.</div>
-    <div class="prompt">
-      <span class="prompt-prefix">
-        <span class="username">guest</span>@<span class="path">portfolio:~$</span>
-      </span>
-      <input type="text" id="terminal-input" placeholder="Type a command..." autocomplete="off">
-    </div>
   `;
   
-  const terminalInput = document.getElementById('terminal-input');
+  // Create prompt separately
+  const promptElement = document.createElement('div');
+  promptElement.className = 'prompt';
+  promptElement.innerHTML = `
+    <span class="prompt-prefix">
+      <span class="username">abilbiju</span>@<span class="path">portfolio:~$</span>
+    </span>
+    <input type="text" placeholder="Type a command..." autocomplete="off">
+  `;
+  terminalContent.appendChild(promptElement);
+  
+  const terminalInput = promptElement.querySelector('input');
   terminalInput.focus();
   
   terminalInput.addEventListener('keydown', function(e) {
@@ -693,22 +699,55 @@ function initTerminal() {
   });
 }
 
+// Flag to prevent multiple commands from executing simultaneously
+let commandInProgress = false;
+
 // Execute terminal commands
 function executeCommand(command) {
+  // Prevent multiple commands from executing at once
+  if (commandInProgress) {
+    console.log('Command already in progress, ignoring new command');
+    return;
+  }
+  
+  commandInProgress = true;
+  console.log(`Executing command: ${command}`);
+  
+  // Ensure loading screen doesn't reappear
+  const loadingScreen = document.getElementById('loading-screen');
+  if (loadingScreen) {
+    loadingScreen.style.display = 'none';
+    console.log('Hiding loading screen during command execution');
+  }
+  
   const terminalContent = document.getElementById('terminal-content');
   const commandLower = command.toLowerCase();
   
   // Add command to terminal history
   const promptElement = document.querySelector('.prompt');
-  const newPrompt = promptElement.cloneNode(true);
   const input = promptElement.querySelector('input');
   const commandText = input.value || command;
   
-  // Make sure we're properly updating the existing prompt with the command
-  promptElement.innerHTML = promptElement.innerHTML.replace(/<input.*?>/, commandText);
+  // Create a command history entry by cloning the prompt and replacing input with text
+  const commandHistoryElement = document.createElement('div');
+  commandHistoryElement.className = 'executed-command';
+  commandHistoryElement.innerHTML = `
+    <span class="prompt-prefix">
+      <span class="username">abilbiju</span>@<span class="path">portfolio:~$</span>
+    </span>
+    ${commandText}
+  `;
+  
+  // Remove the current prompt from the DOM
+  promptElement.remove();
+  
+  // Add the command history entry to the terminal
+  terminalContent.appendChild(commandHistoryElement);
   
   // Process command
   let output = '';
+  // Flag to control if we should add a prompt after command execution
+  let addPromptAfter = true;
   
   switch (commandLower) {
     case 'help':
@@ -759,15 +798,22 @@ function executeCommand(command) {
             <div class="command-name">help</div>
             <div class="command-desc">Display this help message</div>
           </div>
+          <div class="command-item">
+            <div class="command-name">reset</div>
+            <div class="command-desc">Reset the page if loading screen is stuck</div>
+          </div>
+          <div class="command-item">
+            <div class="command-name">download_resume</div>
+            <div class="command-desc">Download my resume as a PDF file</div>
+          </div>
         </div>
       `;
-      terminalContent.insertAdjacentHTML('beforeend', `<div class="command-output">${output}</div>`);
-      addNewPrompt(terminalContent, newPrompt);
       break;
     case 'clear':
       terminalContent.innerHTML = '';
       initTerminal();
-      return;
+      addPromptAfter = false;
+      break;
     case 'about':
     case 'resume':
     case 'projects':
@@ -778,39 +824,93 @@ function executeCommand(command) {
     case 'activities':
     case 'social':
       // Load content from text files
-      fetchContent(commandLower, terminalContent, newPrompt);
+      fetchContent(commandLower);
+      addPromptAfter = false; // fetchContent will add its own prompt
+      break;
+    case 'reset':
+      // Reset the page to fix any issues with loading screen
+      output = `<div class="command-output success">Resetting page...</div>`;
+      setTimeout(() => {
+        // Make sure to release the command lock before reloading
+        commandInProgress = false;
+        window.location.reload();
+      }, 1000);
+      break;
+    case 'download_resume':
+      // Open the resume PDF in a new window
+      window.open('abilbijuresume.pdf', '_blank');
+      output = `<div class="command-output success">Opening resume PDF in a new window...</div>`;
       break;
     default:
       output = `<div class="command-output error">Command not found: ${command}. Type 'help' for available commands.</div>`;
-      terminalContent.insertAdjacentHTML('beforeend', output);
-      addNewPrompt(terminalContent, newPrompt);
-  }
-}
-
-// Helper function to add a new prompt consistently
-function addNewPrompt(terminalContent, newPrompt) {
-  terminalContent.appendChild(newPrompt);
-  const newInput = newPrompt.querySelector('input');
-  if (newInput) {
-    newInput.focus();
   }
   
-  // Scroll to bottom
-  terminalContent.scrollTop = terminalContent.scrollHeight;
+  if (output) {
+    terminalContent.insertAdjacentHTML('beforeend', `<div class="command-output">${output}</div>`);
+  }
+  
+  // Add a new prompt if needed
+  if (addPromptAfter) {
+    // Create a new prompt element
+    const newPrompt = document.createElement('div');
+    newPrompt.className = 'prompt';
+    newPrompt.innerHTML = `
+      <span class="prompt-prefix">
+        <span class="username">abilbiju</span>@<span class="path">portfolio:~$</span>
+      </span>
+      <input type="text" placeholder="Type a command..." autocomplete="off">
+    `;
+    
+    terminalContent.appendChild(newPrompt);
+    const newInput = newPrompt.querySelector('input');
+    if (newInput) {
+      newInput.value = '';
+      newInput.focus();
+      
+      // Make sure we attach the event listener to the new input
+      newInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          const command = this.value.trim();
+          if (command) {
+            executeCommand(command);
+            this.value = '';
+          }
+        }
+      });
+    }
+    
+    // Scroll to bottom
+    terminalContent.scrollTop = terminalContent.scrollHeight;
+    
+    // Release the command lock for commands that don't use fetchContent
+    commandInProgress = false;
+  }
 }
 
 // Fetch content from text files
-async function fetchContent(command, terminalContent, newPrompt) {
-  // Show loading indicator
+async function fetchContent(command) {
+  console.log(`Starting fetchContent for command: ${command}`);
+  
+  // Make sure loading screen stays hidden
+  const loadingScreen = document.getElementById('loading-screen');
+  if (loadingScreen) {
+    loadingScreen.style.display = 'none';
+    console.log('Hiding loading screen during content fetch');
+  }
+  
+  const terminalContent = document.getElementById('terminal-content');
+  
+  // Show loading indicator in terminal
   const loadingId = `loading-${Date.now()}`;
   terminalContent.insertAdjacentHTML('beforeend', `
-    <div id="${loadingId}" class="command-output">Loading ${command} content...</div>
+    <div id="${loadingId}" class="command-output"><span class="blink">▋</span> Loading ${command} content...</div>
   `);
   
   try {
+    console.log(`Fetching ${command}.txt file`);
     const response = await fetch(`${command}.txt`);
     if (!response.ok) {
-      throw new Error(`Error loading ${command} content`);
+      throw new Error(`Error loading ${command} content: ${response.status} ${response.statusText}`);
     }
     
     // Remove the loading indicator
@@ -825,11 +925,35 @@ async function fetchContent(command, terminalContent, newPrompt) {
       throw new Error(`No content found for ${command}`);
     }
     
-    const formattedText = text.replace(/\n/g, '<br>');
-    
-    terminalContent.insertAdjacentHTML('beforeend', `
-      <div class="command-output">${formattedText}</div>
-    `);
+    // Special handling for files with HTML content
+    if (command === 'resume') {
+      // Simply insert the text as HTML without replacing newlines
+      // This preserves HTML tags and their functionality
+      terminalContent.insertAdjacentHTML('beforeend', `
+        <div class="command-output resume-output">${text}</div>
+      `);
+      
+      // Add event listeners to any links in the output
+      setTimeout(() => {
+        const resumeOutput = terminalContent.querySelector('.resume-output');
+        if (resumeOutput) {
+          const links = resumeOutput.querySelectorAll('a');
+          links.forEach(link => {
+            console.log('Adding click event to resume link');
+            link.addEventListener('click', (e) => {
+              console.log('Resume link clicked');
+              // The link will open naturally due to the href and target attributes
+            });
+          });
+        }
+      }, 100);
+    } else {
+      // Regular text processing for other commands
+      const formattedText = text.replace(/\n/g, '<br>');
+      terminalContent.insertAdjacentHTML('beforeend', `
+        <div class="command-output">${formattedText}</div>
+      `);
+    }
   } catch (error) {
     console.error(`Failed to fetch ${command}.txt:`, error);
     
@@ -843,8 +967,48 @@ async function fetchContent(command, terminalContent, newPrompt) {
       <div class="command-output error">Failed to load ${command} content. Please try again later.</div>
     `);
   } finally {
-    // Always add a new prompt after the command completes
-    addNewPrompt(terminalContent, newPrompt);
+    console.log(`Finished processing ${command} content, adding new prompt`);
+    
+    // Always ensure loading screen is hidden
+    const loadingScreen = document.getElementById('loading-screen');
+    if (loadingScreen) {
+      loadingScreen.style.display = 'none';
+    }
+    
+    // Release the command lock
+    commandInProgress = false;
+  
+    // Add a new prompt with proper ID
+    const newPrompt = document.createElement('div');
+    newPrompt.className = 'prompt';
+    newPrompt.innerHTML = `
+      <span class="prompt-prefix">
+        <span class="username">abilbiju</span>@<span class="path">portfolio:~$</span>
+      </span>
+      <input type="text" placeholder="Type a command..." autocomplete="off">
+    `;
+    terminalContent.appendChild(newPrompt);
+    
+    // Reset the input field inside the new prompt
+    const newInput = newPrompt.querySelector('input');
+    if (newInput) {
+      newInput.value = '';
+      newInput.focus();
+      
+      // Make sure we attach the event listener to the new input
+      newInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          const command = this.value.trim();
+          if (command) {
+            executeCommand(command);
+            this.value = '';
+          }
+        }
+      });
+    }
+    
+    // Scroll to bottom
+    terminalContent.scrollTop = terminalContent.scrollHeight;
   }
 }
 </script>
