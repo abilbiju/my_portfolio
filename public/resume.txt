@@ -1,0 +1,8 @@
+Opening Resume
+
+My Resume
+
+<a href="abilbijuresume.pdf" target="_blank">📄 Click here to view/download my resume</a>
+
+The above link will open my complete resume in a new tab.
+
