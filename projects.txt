@@ -1,0 +1,9 @@
+Projects:
+1. Research Paper Analyses using LLM and Langchain
+2. Fake News Detection System
+3. RepoRipper - An AI based Github Roaster
+4. Intrusion Detection System
+5. Real Time Doodle Classifier
+6. Web based Taxi Booking System
+7. Image Query System
+8. Live Event Detection System Based on Audio and Deep Learning

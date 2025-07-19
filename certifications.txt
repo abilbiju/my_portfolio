@@ -1,0 +1,7 @@
+Certifications:
+- AWS Knowledge: Cloud Essentials
+- PH125.2x Data Science: Visualization by HarvardX
+- Certified Ethical Hacker by CISCO
+- Ethical Hacking Associate by Red Team Hacker Academy
+- Introduction to Cybersecurity by CISCO
+- Digital Marketing by Google

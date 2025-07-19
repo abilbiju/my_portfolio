@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Abil Biju Portfolio Terminal</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
+    
+    * {
+      box-sizing: border-box;
+    }
+    
+    body {
+      margin: 0;
+      display: flex;
+      height: 100vh;
+      background: #0d1117;
+      color: #58a6ff;
+      font-family: 'JetBrains Mono', 'Consolas', 'Monaco', monospace;
+      font-size: 14px;
+      line-height: 1.5;
+      position: relative;
+    }
+    
+    #loading-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #000;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #0f0;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 20px;
+      overflow: hidden;
+    }
+    
+    .loading-container {
+      width: 80%;
+      max-width: 800px;
+    }
+    
+    .header-title {
+      color: #0f8;
+      white-space: pre;
+      font-size: 24px;
+      font-weight: bold;
+      line-height: 1;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    
+    .loading-text {
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+    
+    .terminal-output {
+      height: 300px;
+      overflow: hidden;
+      font-size: 12px;
+      margin-bottom: 20px;
+      text-align: left;
+    }
+    
+    .progress-container {
+      width: 100%;
+      background: #111;
+      border: 1px solid #0f0;
+      height: 20px;
+      position: relative;
+    }
+    
+    .progress-bar {
+      height: 100%;
+      background-color: #0f0;
+      width: 0%;
+      transition: width 0.3s;
+    }
+    
+    .progress-text {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      text-align: center;
+      line-height: 20px;
+      color: #fff;
+      mix-blend-mode: difference;
+    }
+    
+    .blink {
+      animation: blink-animation 1s steps(5, start) infinite;
+    }
+    
+    @keyframes blink-animation {
+      to {
+        visibility: hidden;
+      }
+    }
+    
+    .typewriter {
+      overflow: hidden;
+      border-right: .15em solid #0f0;
+      white-space: nowrap;
+      margin: 0;
+      letter-spacing: .15em;
+      animation: typing 3.5s steps(40, end), blink-caret .75s step-end infinite;
+    }
+    
+    @keyframes typing {
+      from { width: 0 }
+      to { width: 100% }
+    }
+    
+    @keyframes blink-caret {
+      from, to { border-color: transparent }
+      50% { border-color: #0f0; }
+    }
+    
+    #left { 
+      width: 20%; 
+      height: 100vh;
+      background: #161b22;
+      border-right: 1px solid #30363d;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    #right { 
+      width: 80%; 
+      height: 100vh;
+      background: #0d1117;
+    }
+    
+    #user-info-panel {
+      padding: 15px;
+      background: #0d1117;
+      border-bottom: 1px solid #30363d;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 10px;
+    }
+    
+    #profile-container {
+      margin-bottom: 15px;
+      background-image: radial-gradient(
+        circle,
+        #000 25vmin,
+        #024 100vmax
+      );
+      border-radius: 6px;
+    }
+    
+    .info-box {
+      background: #1c2129;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      padding: 15px;
+      color: #e6edf3;
+      font-size: 14px;
+      line-height: 1.5;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    
+    .info-icon {
+      font-size: 22px;
+      color: #ffffff;
+      flex-shrink: 0;
+      background: #21262d;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+    }
+    
+    
+    .command-panel {
+      background: #0d1117;
+      border-top: 1px solid #30363d;
+      padding: 16px;
+      max-height: 60%;
+      overflow-y: auto;
+    }
+    
+    .panel-title {
+      color: #58a6ff;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #30363d;
+    }
+    
+    .command-btn {
+      display: block;
+      width: 100%;
+      background: #21262d;
+      border: 1px solid #30363d;
+      color: #e6edf3;
+      font-family: inherit;
+      font-size: 12px;
+      padding: 8px 12px;
+      margin: 4px 0;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: left;
+    }
+    
+    .command-btn:hover {
+      background: #30363d;
+      border-color: #58a6ff;
+      color: #58a6ff;
+    }
+    
+    .command-btn:active {
+      background: #161b22;
+      transform: translateY(1px);
+    }
+    
+    .command-btn.active {
+      background: #0d419d;
+      border-color: #1f6feb;
+      color: #ffffff;
+    }
+    
+    #terminal-window {
+      position: relative;
+      height: 100%;
+      background: #0d1117;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .terminal-header {
+      background: #21262d;
+      border-bottom: 1px solid #30363d;
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 40px;
+    }
+    
+    .terminal-controls {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .control-btn {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+    }
+    
+    .control-btn.close { background: #ff5f57; }
+    .control-btn.minimize { background: #ffbd2e; }
+    .control-btn.maximize { background: #28ca42; }
+    
+    .terminal-title {
+      color: #f0f6fc;
+      font-weight: 500;
+      font-size: 13px;
+    }
+    
+    .terminal-content {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+      background: #0d1117;
+      scrollbar-width: thin;
+      scrollbar-color: #30363d #0d1117;
+    }
+    
+    .terminal-content::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    .terminal-content::-webkit-scrollbar-track {
+      background: #0d1117;
+    }
+    
+    .terminal-content::-webkit-scrollbar-thumb {
+      background: #30363d;
+      border-radius: 4px;
+    }
+    
+    .terminal-content::-webkit-scrollbar-thumb:hover {
+      background: #484f58;
+    }
+    
+    .terminal-line {
+      margin: 4px 0;
+      word-wrap: break-word;
+      white-space: pre-wrap;
+    }
+    
+    .command-output {
+      color: #e6edf3;
+      margin: 8px 0;
+    }
+    
+    .command-output.success { color: #3fb950; }
+    .command-output.error { color: #f85149; }
+    .command-output.warning { color: #d29922; }
+    
+    .prompt {
+      display: flex;
+      align-items: center;
+      margin: 8px 0 4px 0;
+    }
+    
+    .prompt-symbol {
+      color: #3fb950;
+      font-weight: 500;
+    }
+    
+    .username {
+      color: #58a6ff;
+      font-weight: 500;
+    }
+    
+    .path {
+      color: #f0f6fc;
+    }
+    
+    .prompt-prefix {
+      display: inline;
+      margin-right: 8px;
+    }
+    
+    .prompt input {
+      background: transparent;
+      border: none;
+      color: #e6edf3;
+      font-family: inherit;
+      font-size: inherit;
+      flex: 1;
+      outline: none;
+      caret-color: #58a6ff;
+    }
+    
+    .prompt input::placeholder {
+      color: #6e7681;
+    }
+    
+    .cursor {
+      display: inline-block;
+      width: 8px;
+      height: 16px;
+      background: #58a6ff;
+      animation: blink 1s infinite;
+      margin-left: 2px;
+    }
+    
+    @keyframes blink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0; }
+    }
+    
+    .intro-text {
+      color: #58a6ff;
+      font-weight: 500;
+    }
+    
+    .help-section {
+      margin: 16px 0;
+      padding: 12px;
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+    }
+    
+    .help-title {
+      color: #f0f6fc;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    
+    .command-item {
+      display: flex;
+      margin: 4px 0;
+      padding: 2px 0;
+    }
+    
+    .command-name {
+      color: #3fb950;
+      font-weight: 500;
+      min-width: 140px;
+    }
+    
+    .command-desc {
+      color: #8b949e;
+    }
+    
+    .typing-animation {
+      border-right: 2px solid #58a6ff;
+      animation: typing 0.02s;
+    }
+    
+    @keyframes typing {
+      from { border-right-color: #58a6ff; }
+      to { border-right-color: transparent; }
+    }
+  </style>
+</head>
+<body>
+<div id="loading-screen">
+  <div class="loading-container">
+    <div class="header-title">
+ █████╗ ██████╗ ██╗██╗         ██████╗ ██╗     ██╗██╗   ██╗
+██╔══██╗██╔══██╗██║██║         ██╔══██╗██║     ██║██║   ██║
+███████║██████╔╝██║██║         ██████╔╝██║     ██║██║   ██║
+██╔══██║██╔══██╗██║██║         ██╔══██╗██║██   ██║██║   ██║
+██║  ██║██████╔╝██║███████╗    ██████╔╝██║╚█████╔╝╚██████╔╝
+╚═╝  ╚═╝╚═════╝ ╚═╝╚══════╝    ╚═════╝ ╚═╝ ╚════╝  ╚═════╝ 
+    </div>
+    
+    <div class="loading-text typewriter">PORTFOLIO TERMINAL OS v2.1.5</div>
+    <div class="terminal-output" id="boot-log"></div>
+    
+    <div class="progress-container">
+      <div class="progress-bar" id="loading-progress"></div>
+      <div class="progress-text">LOADING: <span id="progress-percentage">0</span>%</div>
+    </div>
+  </div>
+</div>
+
+<div id="left">
+  <div id="user-info-panel">
+    <div id="profile-container" class="info-box">
+      <div class="info-icon">👤</div>
+      <div>
+        <strong>Abil Biju</strong><br>
+        Portfolio Terminal
+      </div>
+    </div>
+    <div id="timezone-display" class="info-box">Loading timezone...</div>
+    <div id="weather-display" class="info-box">Loading weather...</div>
+    <div id="ip-display" class="info-box">Loading IP address...</div>
+  </div>
+  <div class="command-panel">
+    <div class="panel-title">Commands</div>
+    <button class="command-btn" data-command="about">📋 About</button>
+    <button class="command-btn" data-command="resume">📄 Resume</button>
+    <button class="command-btn" data-command="projects">🚀 Projects</button>
+    <button class="command-btn" data-command="skills">⚡ Skills</button>
+    <button class="command-btn" data-command="education">🎓 Education</button>
+    <button class="command-btn" data-command="experience">💼 Experience</button>
+    <button class="command-btn" data-command="certifications">🏆 Certifications</button>
+    <button class="command-btn" data-command="activities">🎯 Activities</button>
+    <button class="command-btn" data-command="social">🔗 Social</button>
+    <button class="command-btn" data-command="help">❓ Help</button>
+    <button class="command-btn" data-command="clear">🗑️ Clear</button>
+  </div>
+</div>
+
+<div id="right">
+  <div id="terminal-window">
+    <div class="terminal-header">
+      <div class="terminal-controls">
+        <button class="control-btn close"></button>
+        <button class="control-btn minimize"></button>
+        <button class="control-btn maximize"></button>
+      </div>
+      <div class="terminal-title">Abil Biju: ~/portfolio</div>
+    </div>
+    
+    <div class="terminal-content" id="terminal-content"></div>
+  </div>
+</div>
+
+<script>
+
+// Weather information using date as fallback
+async function showWeather() {
+  const weatherDisplay = document.getElementById('weather-display');
+  
+  try {
+    weatherDisplay.innerHTML = `<div class="info-icon">☁️</div> <div>Fetching weather data...</div>`;
+    
+    // Get current date information instead of weather
+    const now = new Date();
+    const options = { 
+      weekday: 'long',
+      month: 'short', 
+      day: 'numeric',
+      year: 'numeric'
+    };
+    const dateStr = now.toLocaleDateString('en-US', options);
+    
+    // Display date information as a fallback
+    weatherDisplay.innerHTML = `
+      <div class="info-icon">📅</div> 
+      <div>
+        <strong>Today</strong><br>
+        ${dateStr}
+      </div>
+    `;
+  } catch (err) {
+    weatherDisplay.innerHTML = `<div class="info-icon">📅</div> <div>Date unavailable</div>`;
+    console.error('Error displaying date:', err);
+  }
+}
+
+// Show timezone information
+function showTimezone() {
+  const timezoneDisplay = document.getElementById('timezone-display');
+  const options = {
+    timeZoneName: 'long'
+  };
+  
+  try {
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true
+    });
+    const time = formatter.format(new Date());
+    
+    timezoneDisplay.innerHTML = `
+      <div class="info-icon">🕒</div>
+      <div>
+        <strong>${timezone}</strong><br>
+        ${time}
+      </div>
+    `;
+    
+    // Update the time every second
+    setInterval(() => {
+      const updatedTime = formatter.format(new Date());
+      timezoneDisplay.innerHTML = `
+        <div class="info-icon">🕒</div>
+        <div>
+          <strong>${timezone}</strong><br>
+          ${updatedTime}
+        </div>
+      `;
+    }, 1000);
+  } catch (err) {
+    timezoneDisplay.innerHTML = `<div class="info-icon">🕒</div> <div>Timezone unavailable</div>`;
+    console.error('Error getting timezone:', err);
+  }
+}
+
+// Show IP address
+async function showIP() {
+  const ipDisplay = document.getElementById('ip-display');
+  ipDisplay.innerHTML = `<div class="info-icon">🌐</div> <div>Fetching IP...</div>`;
+  
+  try {
+    // Use a public IP API service
+    const response = await fetch('https://api.ipify.org?format=json');
+    if (!response.ok) {
+      throw new Error('Failed to fetch IP address');
+    }
+    
+    const data = await response.json();
+    const ip = data.ip;
+    
+    ipDisplay.innerHTML = `
+      <div class="info-icon">🌐</div>
+      <div>
+        <strong>IP Address</strong><br>
+        ${ip}
+      </div>
+    `;
+  } catch (err) {
+    console.error('Error fetching IP:', err);
+    ipDisplay.innerHTML = `<div class="info-icon">🌐</div> <div>Local Session</div>`;
+  }
+}
+
+// Initialize everything when the page loads
+window.addEventListener('DOMContentLoaded', () => {
+  console.log('DOM content loaded');
+  
+  // Simulate loading
+  const loadingScreen = document.getElementById('loading-screen');
+  const progressBar = document.getElementById('loading-progress');
+  const progressPercentage = document.getElementById('progress-percentage');
+  const bootLog = document.getElementById('boot-log');
+  
+  const bootMessages = [
+    'Initializing portfolio system...',
+    'Loading terminal components...',
+    'Setting up user interface...',
+    'Loading user data...',
+    'Configuring command interface...',
+    'Starting system services...',
+    'Establishing connection...',
+    'Security scan complete...',
+    'Finalizing setup...',
+    'Welcome to Portfolio Terminal OS v2.1.5'
+  ];
+  
+  let progress = 0;
+  let messageIndex = 0;
+  
+  const loadingInterval = setInterval(() => {
+    progress += Math.floor(Math.random() * 10) + 1;
+    if (progress >= 100) {
+      progress = 100;
+      clearInterval(loadingInterval);
+      
+      setTimeout(() => {
+        loadingScreen.style.opacity = 0;
+        setTimeout(() => {
+          loadingScreen.style.display = 'none';
+          
+          // Initialize main interface components
+          showWeather();
+          showTimezone();
+          showIP();
+          
+          // Initialize terminal
+          initTerminal();
+        }, 500);
+      }, 1000);
+    }
+    
+    progressBar.style.width = `${progress}%`;
+    progressPercentage.textContent = progress;
+    
+    if (progress > (messageIndex + 1) * 10 && messageIndex < bootMessages.length) {
+      bootLog.innerHTML += `<div>[SYSTEM] ${bootMessages[messageIndex]}</div>`;
+      bootLog.scrollTop = bootLog.scrollHeight;
+      messageIndex++;
+    }
+  }, 200);
+  
+  // Set up command buttons
+  document.querySelectorAll('.command-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const command = this.getAttribute('data-command');
+      executeCommand(command);
+    });
+  });
+});
+
+// Initialize terminal
+function initTerminal() {
+  const terminalContent = document.getElementById('terminal-content');
+  
+  // Welcome message
+  terminalContent.innerHTML = `
+    <div class="terminal-line intro-text">Welcome to Abil Biju's Portfolio Terminal!</div>
+    <div class="terminal-line">Type <span style="color: #3fb950;">help</span> to see available commands.</div>
+    <div class="prompt">
+      <span class="prompt-prefix">
+        <span class="username">guest</span>@<span class="path">portfolio:~$</span>
+      </span>
+      <input type="text" id="terminal-input" placeholder="Type a command..." autocomplete="off">
+    </div>
+  `;
+  
+  const terminalInput = document.getElementById('terminal-input');
+  terminalInput.focus();
+  
+  terminalInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      const command = this.value.trim();
+      if (command) {
+        executeCommand(command);
+        this.value = '';
+      }
+    }
+  });
+  
+  // Focus on terminal input when clicking anywhere in the terminal
+  terminalContent.addEventListener('click', function() {
+    terminalInput.focus();
+  });
+}
+
+// Execute terminal commands
+function executeCommand(command) {
+  const terminalContent = document.getElementById('terminal-content');
+  const commandLower = command.toLowerCase();
+  
+  // Add command to terminal history
+  const promptElement = document.querySelector('.prompt');
+  const newPrompt = promptElement.cloneNode(true);
+  const input = promptElement.querySelector('input');
+  const commandText = input.value || command;
+  
+  promptElement.innerHTML = promptElement.innerHTML.replace(/<input.*?>/, commandText);
+  
+  // Process command
+  let output = '';
+  
+  switch (commandLower) {
+    case 'help':
+      output = `
+        <div class="help-section">
+          <div class="help-title">Available Commands:</div>
+          <div class="command-item">
+            <div class="command-name">about</div>
+            <div class="command-desc">Display information about me</div>
+          </div>
+          <div class="command-item">
+            <div class="command-name">resume</div>
+            <div class="command-desc">View my resume</div>
+          </div>
+          <div class="command-item">
+            <div class="command-name">projects</div>
+            <div class="command-desc">Display my projects</div>
+          </div>
+          <div class="command-item">
+            <div class="command-name">skills</div>
+            <div class="command-desc">List my technical skills</div>
+          </div>
+          <div class="command-item">
+            <div class="command-name">education</div>
+            <div class="command-desc">View my education background</div>
+          </div>
+          <div class="command-item">
+            <div class="command-name">experience</div>
+            <div class="command-desc">Display my work experience</div>
+          </div>
+          <div class="command-item">
+            <div class="command-name">certifications</div>
+            <div class="command-desc">List my certifications</div>
+          </div>
+          <div class="command-item">
+            <div class="command-name">activities</div>
+            <div class="command-desc">View my activities and interests</div>
+          </div>
+          <div class="command-item">
+            <div class="command-name">social</div>
+            <div class="command-desc">Display my social media profiles</div>
+          </div>
+          <div class="command-item">
+            <div class="command-name">clear</div>
+            <div class="command-desc">Clear the terminal</div>
+          </div>
+          <div class="command-item">
+            <div class="command-name">help</div>
+            <div class="command-desc">Display this help message</div>
+          </div>
+        </div>
+      `;
+      break;
+    case 'clear':
+      terminalContent.innerHTML = '';
+      initTerminal();
+      return;
+    case 'about':
+    case 'resume':
+    case 'projects':
+    case 'skills':
+    case 'education':
+    case 'experience':
+    case 'certifications':
+    case 'activities':
+    case 'social':
+      // Load content from text files
+      fetchContent(commandLower);
+      break;
+    default:
+      output = `<div class="command-output error">Command not found: ${command}. Type 'help' for available commands.</div>`;
+  }
+  
+  if (output) {
+    terminalContent.insertAdjacentHTML('beforeend', `<div class="command-output">${output}</div>`);
+  }
+  
+  // Add a new prompt
+  if (commandLower !== 'clear') {
+    terminalContent.appendChild(newPrompt);
+    const newInput = newPrompt.querySelector('input');
+    if (newInput) {
+      newInput.focus();
+    }
+    
+    // Scroll to bottom
+    terminalContent.scrollTop = terminalContent.scrollHeight;
+  }
+}
+
+// Fetch content from text files
+async function fetchContent(command) {
+  const terminalContent = document.getElementById('terminal-content');
+  
+  try {
+    const response = await fetch(`${command}.txt`);
+    if (!response.ok) {
+      throw new Error(`Error loading ${command} content`);
+    }
+    
+    const text = await response.text();
+    const formattedText = text.replace(/\n/g, '<br>');
+    
+    terminalContent.insertAdjacentHTML('beforeend', `
+      <div class="command-output">${formattedText}</div>
+    `);
+  } catch (error) {
+    console.error(`Failed to fetch ${command}.txt:`, error);
+    terminalContent.insertAdjacentHTML('beforeend', `
+      <div class="command-output error">Failed to load ${command} content. Please try again later.</div>
+    `);
+  }
+  
+  // Add a new prompt
+  const newPrompt = document.querySelector('.prompt').cloneNode(true);
+  terminalContent.appendChild(newPrompt);
+  const newInput = newPrompt.querySelector('input');
+  if (newInput) {
+    newInput.focus();
+  }
+  
+  // Scroll to bottom
+  terminalContent.scrollTop = terminalContent.scrollHeight;
+}
+</script>
