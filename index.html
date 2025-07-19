@@ -704,6 +704,7 @@ function executeCommand(command) {
   const input = promptElement.querySelector('input');
   const commandText = input.value || command;
   
+  // Make sure we're properly updating the existing prompt with the command
   promptElement.innerHTML = promptElement.innerHTML.replace(/<input.*?>/, commandText);
   
   // Process command
@@ -760,6 +761,8 @@ function executeCommand(command) {
           </div>
         </div>
       `;
+      terminalContent.insertAdjacentHTML('beforeend', `<div class="command-output">${output}</div>`);
+      addNewPrompt(terminalContent, newPrompt);
       break;
     case 'clear':
       terminalContent.innerHTML = '';
@@ -775,54 +778,17 @@ function executeCommand(command) {
     case 'activities':
     case 'social':
       // Load content from text files
-      fetchContent(commandLower);
+      fetchContent(commandLower, terminalContent, newPrompt);
       break;
     default:
       output = `<div class="command-output error">Command not found: ${command}. Type 'help' for available commands.</div>`;
-  }
-  
-  if (output) {
-    terminalContent.insertAdjacentHTML('beforeend', `<div class="command-output">${output}</div>`);
-  }
-  
-  // Add a new prompt
-  if (commandLower !== 'clear') {
-    terminalContent.appendChild(newPrompt);
-    const newInput = newPrompt.querySelector('input');
-    if (newInput) {
-      newInput.focus();
-    }
-    
-    // Scroll to bottom
-    terminalContent.scrollTop = terminalContent.scrollHeight;
+      terminalContent.insertAdjacentHTML('beforeend', output);
+      addNewPrompt(terminalContent, newPrompt);
   }
 }
 
-// Fetch content from text files
-async function fetchContent(command) {
-  const terminalContent = document.getElementById('terminal-content');
-  
-  try {
-    const response = await fetch(`${command}.txt`);
-    if (!response.ok) {
-      throw new Error(`Error loading ${command} content`);
-    }
-    
-    const text = await response.text();
-    const formattedText = text.replace(/\n/g, '<br>');
-    
-    terminalContent.insertAdjacentHTML('beforeend', `
-      <div class="command-output">${formattedText}</div>
-    `);
-  } catch (error) {
-    console.error(`Failed to fetch ${command}.txt:`, error);
-    terminalContent.insertAdjacentHTML('beforeend', `
-      <div class="command-output error">Failed to load ${command} content. Please try again later.</div>
-    `);
-  }
-  
-  // Add a new prompt
-  const newPrompt = document.querySelector('.prompt').cloneNode(true);
+// Helper function to add a new prompt consistently
+function addNewPrompt(terminalContent, newPrompt) {
   terminalContent.appendChild(newPrompt);
   const newInput = newPrompt.querySelector('input');
   if (newInput) {
@@ -831,5 +797,54 @@ async function fetchContent(command) {
   
   // Scroll to bottom
   terminalContent.scrollTop = terminalContent.scrollHeight;
+}
+
+// Fetch content from text files
+async function fetchContent(command, terminalContent, newPrompt) {
+  // Show loading indicator
+  const loadingId = `loading-${Date.now()}`;
+  terminalContent.insertAdjacentHTML('beforeend', `
+    <div id="${loadingId}" class="command-output">Loading ${command} content...</div>
+  `);
+  
+  try {
+    const response = await fetch(`${command}.txt`);
+    if (!response.ok) {
+      throw new Error(`Error loading ${command} content`);
+    }
+    
+    // Remove the loading indicator
+    const loadingElement = document.getElementById(loadingId);
+    if (loadingElement) {
+      loadingElement.remove();
+    }
+    
+    const text = await response.text();
+    // Make sure the text is not empty
+    if (!text.trim()) {
+      throw new Error(`No content found for ${command}`);
+    }
+    
+    const formattedText = text.replace(/\n/g, '<br>');
+    
+    terminalContent.insertAdjacentHTML('beforeend', `
+      <div class="command-output">${formattedText}</div>
+    `);
+  } catch (error) {
+    console.error(`Failed to fetch ${command}.txt:`, error);
+    
+    // Remove the loading indicator if it still exists
+    const loadingElement = document.getElementById(loadingId);
+    if (loadingElement) {
+      loadingElement.remove();
+    }
+    
+    terminalContent.insertAdjacentHTML('beforeend', `
+      <div class="command-output error">Failed to load ${command} content. Please try again later.</div>
+    `);
+  } finally {
+    // Always add a new prompt after the command completes
+    addNewPrompt(terminalContent, newPrompt);
+  }
 }
 </script>
